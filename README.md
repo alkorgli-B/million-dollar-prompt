@@ -159,9 +159,8 @@ MIT License — See [LICENSE](./LICENSE) for details.
 
 ## 🔗 Links
 
-- **Website**: [milliondollarprompt.com](https://milliondollarprompt.com)
-- **Twitter/X**: [@MillionDPrompt](https://twitter.com/MillionDPrompt)
-
+- **Website**: 
+- **Twitter/X**: 
 -----
 
 <p align="center">
