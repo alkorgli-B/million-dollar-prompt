@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { Word } from "@/lib/types";
 import {
   SAMPLE_WORDS,
@@ -9,7 +9,7 @@ import {
   GRID_COLS_DESKTOP,
   GRID_ROWS_DESKTOP,
 } from "@/lib/constants";
-import { getRandomItem, getColorClass } from "@/lib/utils";
+import { getColorClass } from "@/lib/utils";
 
 interface GridProps {
   words: Word[];
@@ -26,7 +26,6 @@ interface CellData {
 export default function Grid({ words, onCellClick }: GridProps) {
   const [filter, setFilter] = useState<"all" | "available" | "sold">("all");
   const [search, setSearch] = useState("");
-  const [cells, setCells] = useState<CellData[]>([]);
   const [tooltip, setTooltip] = useState<{
     visible: boolean;
     x: number;
@@ -35,11 +34,9 @@ export default function Grid({ words, onCellClick }: GridProps) {
     owner?: string;
     sold: boolean;
   }>({ visible: false, x: 0, y: 0, content: "", sold: false });
-  const [lastTime, setLastTime] = useState(0);
   const [cols, setCols] = useState(GRID_COLS_DESKTOP);
   const [rows, setRows] = useState(GRID_ROWS_DESKTOP);
   const gridRef = useRef<HTMLDivElement>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Determine grid dimensions based on viewport
   useEffect(() => {
@@ -61,15 +58,14 @@ export default function Grid({ words, onCellClick }: GridProps) {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Build cells from real words + demo data
-  useEffect(() => {
+  // Build cells from real words + stable demo data
+  const cells = useMemo(() => {
     const totalCells = cols * rows;
     const newCells: CellData[] = [];
 
-    // Create a set of occupied positions from real words
+    // Create a map of occupied positions from real words
     const occupied = new Map<string, Word>();
     words.forEach((w) => {
-      // Map word grid position to viewport position
       const viewX = w.grid_x % cols;
       const viewY = w.grid_y % rows;
       occupied.set(`${viewX},${viewY}`, w);
@@ -88,52 +84,26 @@ export default function Grid({ words, onCellClick }: GridProps) {
           owner: w.owner_name || "Anonymous",
           colorClass: getColorClass(w.color),
         });
-      } else if (Math.random() < 0.13) {
-        // Demo cells for visual density
-        newCells.push({
-          sold: true,
-          word: getRandomItem(SAMPLE_WORDS),
-          owner: getRandomItem(SAMPLE_OWNERS),
-          colorClass: getRandomItem([...CELL_COLORS]),
-        });
       } else {
-        newCells.push({ sold: false });
+        // Deterministic demo fill: use cell index to decide (~12% fill)
+        const hash = ((i * 7919 + 104729) % 100);
+        if (hash < 12) {
+          const wordIdx = i % SAMPLE_WORDS.length;
+          const ownerIdx = i % SAMPLE_OWNERS.length;
+          const colorIdx = i % CELL_COLORS.length;
+          newCells.push({
+            sold: true,
+            word: SAMPLE_WORDS[wordIdx],
+            owner: SAMPLE_OWNERS[ownerIdx],
+            colorClass: CELL_COLORS[colorIdx],
+          });
+        } else {
+          newCells.push({ sold: false });
+        }
       }
     }
-    setCells(newCells);
+    return newCells;
   }, [words, cols, rows]);
-
-  // Simulate live purchases
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCells((prev) => {
-        const empty = prev
-          .map((c, i) => ({ c, i }))
-          .filter((x) => !x.c.sold);
-        if (!empty.length) return prev;
-        const pick = empty[Math.floor(Math.random() * empty.length)];
-        const updated = [...prev];
-        updated[pick.i] = {
-          sold: true,
-          word: getRandomItem(SAMPLE_WORDS),
-          owner: getRandomItem(SAMPLE_OWNERS),
-          colorClass: getRandomItem([...CELL_COLORS]),
-        };
-        return updated;
-      });
-    }, 5500);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Timer for "last purchase"
-  useEffect(() => {
-    timerRef.current = setInterval(() => {
-      setLastTime((t) => (t > 6 ? 0 : t + 1));
-    }, 1000);
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, []);
 
   const soldCount = cells.filter((c) => c.sold).length;
   const soldPercent = ((soldCount / (cols * rows)) * 100).toFixed(1);
@@ -248,13 +218,13 @@ export default function Grid({ words, onCellClick }: GridProps) {
             <b>{soldPercent}%</b> sold
           </span>
           <span className="gin">
-            Last: <b>{lastTime}s</b> ago
-          </span>
-          <span className="gin">
-            Top: <b>&quot;dream&quot;</b>
-          </span>
-          <span className="gin">
             Owners: <b>{soldCount.toLocaleString()}</b>
+          </span>
+          <span className="gin">
+            Cells: <b>{(cols * rows).toLocaleString()}</b> visible
+          </span>
+          <span className="gin">
+            Total: <b>1,000,000</b> cells
           </span>
         </div>
       </div>

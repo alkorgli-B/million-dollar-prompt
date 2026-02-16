@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase";
 import { findAvailablePosition, getRandomColor } from "@/lib/utils";
 
-// GET /api/words — Fetch all words
+// GET /api/words — Fetch all visible words
 export async function GET() {
   try {
     const supabase = createServerClient();
     const { data: words, error } = await supabase
       .from("words")
       .select("*")
-      .eq("payment_status", "demo") // or 'paid' when Stripe is added
+      .in("payment_status", ["demo", "paid"])
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -17,38 +17,26 @@ export async function GET() {
     }
 
     return NextResponse.json({ words: words || [] });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Failed to fetch words", words: [] },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Failed to fetch words", words: [] }, { status: 500 });
   }
 }
 
-// POST /api/words — Create word(s) (demo mode — no payment)
+// POST /api/words — Create word(s)
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const {
-      word,
-      owner_name,
-      owner_link,
-      package: pkg = 1,
-    } = body;
+    const { word, owner_name, owner_link, package: pkg = 1 } = body;
 
     if (!word || typeof word !== "string" || word.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Word is required" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Word is required" }, { status: 400 });
     }
 
     if (word.trim().length > 30) {
-      return NextResponse.json(
-        { error: "Word must be 30 characters or less" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Word must be 30 characters or less" }, { status: 400 });
     }
+
+    const wordCount = Math.min(Math.max(pkg, 1), 25);
 
     const supabase = createServerClient();
 
@@ -61,24 +49,22 @@ export async function POST(req: NextRequest) {
       (existingWords || []).map((w) => `${w.grid_x},${w.grid_y}`)
     );
 
-    // Create word entries (for packages > 1, create multiple)
+    // Create word entries
     const wordsToInsert = [];
-    const wordCount = Math.min(pkg, 25); // Max 25 words per purchase
 
     for (let i = 0; i < wordCount; i++) {
       const pos = findAvailablePosition(occupied);
       occupied.add(`${pos.x},${pos.y}`);
 
       wordsToInsert.push({
-        word: i === 0 ? word.trim() : `${word.trim()}`,
+        word: word.trim(),
         owner_name: owner_name || null,
         owner_link: owner_link || null,
         grid_x: pos.x,
         grid_y: pos.y,
         color: getRandomColor(),
         package: pkg,
-        payment_status: "demo", // TODO: Change to 'pending' when Stripe is added
-        // TODO: Add stripe_session_id when Stripe is integrated
+        payment_status: "demo",
       });
     }
 
@@ -91,19 +77,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: error.message }, { status: 500 });
     }
 
-    // Update stats — try RPC first, fall back to manual update
+    // Update stats
     const rpcResult = await supabase.rpc("increment_stats", {
       sold_count: wordCount,
       revenue_amount: wordCount,
     });
 
     if (rpcResult.error) {
-      // RPC doesn't exist yet — update manually
+      // Fallback: manual stats update
+      const totalSold = (existingWords?.length || 0) + wordCount;
       await supabase
         .from("stats")
         .update({
-          total_sold: (existingWords?.length || 0) + wordCount,
-          total_revenue: (existingWords?.length || 0) + wordCount,
+          total_sold: totalSold,
+          total_revenue: totalSold,
           last_purchase_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         })
@@ -111,10 +98,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ words: insertedWords });
-  } catch (err) {
-    return NextResponse.json(
-      { error: "Failed to create word" },
-      { status: 500 }
-    );
+  } catch {
+    return NextResponse.json({ error: "Failed to create word" }, { status: 500 });
   }
 }

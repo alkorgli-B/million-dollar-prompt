@@ -1,11 +1,36 @@
 "use client";
 
 const milestones = [
-  { key: "1,000 WORDS", title: "The Spark ⚡", desc: "AI generates meaningful responses. First media coverage.", active: true },
-  { key: "10,000 WORDS", title: "The Wave 🌊", desc: "AI becomes complex. Viral moment. Product Hunt launch.", active: true },
-  { key: "100,000 WORDS", title: "The Movement 🚀", desc: "Global media. Premium zones. Celebrity participants.", active: false },
-  { key: "500,000 WORDS", title: "The Phenomenon 🌟", desc: "AI generates art, music, stories. Open API.", active: false },
-  { key: "1,000,000 WORDS", title: "The Legacy ⭐", desc: "Final prompt. Ultimate AI response. Archived forever.", active: false },
+  {
+    key: "LAUNCH",
+    title: "Project Goes Live",
+    desc: "Website launches. First words placed on the grid. AI begins generating responses from the initial prompt.",
+    active: true,
+  },
+  {
+    key: "1,000 WORDS",
+    title: "The Spark",
+    desc: "AI generates increasingly meaningful responses. First press coverage. Community begins forming around the experiment.",
+    active: false,
+  },
+  {
+    key: "10,000 WORDS",
+    title: "The Wave",
+    desc: "AI output becomes deeply complex and nuanced. Product Hunt launch. Social media sharing takes off.",
+    active: false,
+  },
+  {
+    key: "100,000 WORDS",
+    title: "The Movement",
+    desc: "Global media attention. Premium grid zones activated. Charity donations cross significant milestones.",
+    active: false,
+  },
+  {
+    key: "1,000,000 WORDS",
+    title: "The Legacy",
+    desc: "The grid closes permanently. Final AI response is archived as a historic artifact of collective human creativity.",
+    active: false,
+  },
 ];
 
 export default function Timeline() {
@@ -15,6 +40,7 @@ export default function Timeline() {
         <div className="sh">
           <span className="stag">Roadmap</span>
           <h2 className="st">The Journey to<br />One Million</h2>
+          <p className="sd">Every word sold brings us closer to the world&apos;s largest collaborative AI prompt.</p>
         </div>
         <div className="tl">
           <div className="tl-l"></div>

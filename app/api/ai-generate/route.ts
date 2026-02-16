@@ -24,39 +24,32 @@ export async function GET() {
   }
 }
 
-// POST /api/ai-generate — Trigger AI generation (called by Vercel Cron every 5 min)
+// POST /api/ai-generate — Trigger new AI generation (Vercel Cron, every 5 min)
 export async function POST(req: NextRequest) {
   try {
-    // Verify cron secret for security (optional, for Vercel Cron)
+    // Verify cron secret in production
     const authHeader = req.headers.get("authorization");
     const cronSecret = process.env.CRON_SECRET;
-    if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
-      // Allow without auth in development
-      if (process.env.NODE_ENV === "production") {
+    if (cronSecret && process.env.NODE_ENV === "production") {
+      if (authHeader !== `Bearer ${cronSecret}`) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
       }
     }
 
     const supabase = createServerClient();
 
-    // Fetch all words from database
+    // Fetch all words
     const { data: words, error: wordsError } = await supabase
       .from("words")
       .select("word")
       .order("created_at", { ascending: true });
 
     if (wordsError) {
-      return NextResponse.json(
-        { error: wordsError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: wordsError.message }, { status: 500 });
     }
 
     if (!words || words.length === 0) {
-      return NextResponse.json(
-        { error: "No words in database yet" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "No words in database yet" }, { status: 400 });
     }
 
     const wordList = words.map((w) => w.word);
@@ -71,7 +64,7 @@ export async function POST(req: NextRequest) {
 
     const nextGenNumber = (lastGen?.generation_number || 0) + 1;
 
-    // Generate AI response (auto-fallback: Groq → Gemini → Claude)
+    // Generate AI response (auto-fallback: Groq -> Gemini -> Claude)
     const { response, tokens, model, provider } = await generateAIResponse(wordList);
 
     // Save to database
@@ -90,10 +83,7 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (insertError) {
-      return NextResponse.json(
-        { error: insertError.message },
-        { status: 500 }
-      );
+      return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
     // Update stats
@@ -105,10 +95,7 @@ export async function POST(req: NextRequest) {
       })
       .eq("id", 1);
 
-    return NextResponse.json({
-      success: true,
-      generation: newGen,
-    });
+    return NextResponse.json({ success: true, generation: newGen });
   } catch (err) {
     const message = err instanceof Error ? err.message : "AI generation failed";
     return NextResponse.json({ error: message }, { status: 500 });

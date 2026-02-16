@@ -4,27 +4,32 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Million Dollar Prompt — Buy a Word. Shape the AI. Make History.",
   description:
-    "The world's largest collaborative AI experiment. Buy a word for $1, join 1 million others, and watch AI respond to humanity's collective voice.",
+    "The world's largest collaborative AI experiment. Buy a word for $1, join one million others, and watch AI respond to humanity's collective voice. 30% of profits donated to children's hospitals.",
   keywords:
-    "million dollar prompt, collaborative AI, buy a word, internet history, AI experiment",
+    "million dollar prompt, collaborative AI experiment, buy a word, AI prompt, internet history, collective AI, word grid",
   authors: [{ name: "MillionDollarPrompt" }],
+  metadataBase: new URL("https://milliondollarprompt.com"),
   openGraph: {
-    title:
-      "Million Dollar Prompt — I Bought a Word in History's Largest AI Experiment",
+    title: "Million Dollar Prompt — The World's Largest Collaborative AI Experiment",
     description:
       "1,000,000 words. $1 each. One massive AI prompt. What happens when a million minds write together?",
     type: "website",
     url: "https://milliondollarprompt.com",
-    images: [{ url: "https://milliondollarprompt.com/og-image.png" }],
+    siteName: "Million Dollar Prompt",
+    locale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Million Dollar Prompt",
+    title: "Million Dollar Prompt — Buy a Word. Shape the AI.",
     description:
-      "Buy a word for $1. Join the world's largest AI experiment.",
+      "Buy a word for $1. Join the world's largest collaborative AI experiment. 30% donated to children's hospitals.",
+  },
+  robots: {
+    index: true,
+    follow: true,
   },
   icons: {
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>",
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>$</text></svg>",
   },
 };
 
