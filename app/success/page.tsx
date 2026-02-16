@@ -7,10 +7,19 @@ export default function SuccessPage() {
   const [word, setWord] = useState<string | null>(null);
 
   useEffect(() => {
-    // In production, this would read from Stripe session
     const params = new URLSearchParams(window.location.search);
     setWord(params.get("word") || "YOUR WORD");
   }, []);
+
+  const shareOnX = () => {
+    const text = encodeURIComponent(
+      `I just added "${word}" to the Million Dollar Prompt! #MillionDollarPrompt`
+    );
+    window.open(
+      `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent("https://milliondollarprompt.com")}`,
+      "_blank"
+    );
+  };
 
   return (
     <>
@@ -30,7 +39,7 @@ export default function SuccessPage() {
         }}
       >
         <div className="succ">
-          <div className="se">🎉</div>
+          <div className="se" style={{ fontSize: "3.5rem", marginBottom: ".8rem" }}>&#10003;</div>
           <h1 className="stt" style={{ fontSize: "2rem" }}>
             You&apos;re Part of History!
           </h1>
@@ -49,8 +58,7 @@ export default function SuccessPage() {
             prompt. The next AI generation will include your contribution.
           </p>
           <div className="shbs" style={{ marginBottom: "1.5rem" }}>
-            <button className="shb">𝕏 Share on X</button>
-            <button className="shb">📷 Download Card</button>
+            <button className="shb" onClick={shareOnX}>&#120143; Share on X</button>
           </div>
           <Link
             href="/"

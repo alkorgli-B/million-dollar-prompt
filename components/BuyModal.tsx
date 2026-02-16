@@ -19,10 +19,10 @@ export default function BuyModal({
   const [link, setLink] = useState("");
   const [name, setName] = useState("");
   const [pkg, setPkg] = useState(initialPackage);
-  const [error, setError] = useState(false);
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [successData, setSuccessData] = useState({ word: "", id: "", grid: "" });
+  const [successData, setSuccessData] = useState({ word: "", id: "" });
   const wordRef = useRef<HTMLInputElement>(null);
   const bgRef = useRef<HTMLDivElement>(null);
 
@@ -34,7 +34,7 @@ export default function BuyModal({
     if (isOpen) {
       document.body.style.overflow = "hidden";
       setSuccess(false);
-      setError(false);
+      setError("");
       setWord("");
       setLink("");
       setName("");
@@ -58,13 +58,19 @@ export default function BuyModal({
 
   const handlePurchase = async () => {
     if (!word.trim()) {
-      setError(true);
+      setError("Please enter a word or phrase.");
+      wordRef.current?.focus();
+      return;
+    }
+
+    if (word.trim().length > 30) {
+      setError("Word must be 30 characters or less.");
       wordRef.current?.focus();
       return;
     }
 
     setLoading(true);
-    setError(false);
+    setError("");
 
     try {
       const res = await fetch("/api/words", {
@@ -80,33 +86,21 @@ export default function BuyModal({
 
       if (res.ok) {
         const data = await res.json();
-        const w = data.words?.[0] || data.word;
+        const w = data.words?.[0];
         setSuccessData({
           word: word.trim().toUpperCase(),
-          id: w ? `WORD #${w.grid_x * 1000 + w.grid_y} — GRID [${w.grid_x}, ${w.grid_y}]` : `WORD #${Math.floor(Math.random() * 10000)}`,
-          grid: "",
+          id: w
+            ? `WORD #${String(w.grid_x * 1000 + w.grid_y).padStart(6, "0")} — GRID [${w.grid_x}, ${w.grid_y}]`
+            : "WORD PLACED",
         });
         setSuccess(true);
         onSuccess?.();
       } else {
-        // Fallback: still show success in demo mode
-        setSuccessData({
-          word: word.trim().toUpperCase(),
-          id: `WORD #${Math.floor(Math.random() * 10000)} — GRID [${Math.floor(Math.random() * 60)}, ${Math.floor(Math.random() * 27)}]`,
-          grid: "",
-        });
-        setSuccess(true);
-        onSuccess?.();
+        const data = await res.json().catch(() => null);
+        setError(data?.error || "Something went wrong. Please try again.");
       }
     } catch {
-      // Demo mode fallback
-      setSuccessData({
-        word: word.trim().toUpperCase(),
-        id: `WORD #${Math.floor(Math.random() * 10000)} — GRID [${Math.floor(Math.random() * 60)}, ${Math.floor(Math.random() * 27)}]`,
-        grid: "",
-      });
-      setSuccess(true);
-      onSuccess?.();
+      setError("Connection failed. Please check your internet and try again.");
     } finally {
       setLoading(false);
     }
@@ -114,7 +108,7 @@ export default function BuyModal({
 
   const shareOnX = () => {
     const text = encodeURIComponent(
-      `I just added "${successData.word}" to the Million Dollar Prompt! 🧠⚡ #MillionDollarPrompt`
+      `I just added "${successData.word}" to the Million Dollar Prompt! #MillionDollarPrompt`
     );
     window.open(
       `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent("https://milliondollarprompt.com")}`,
@@ -139,7 +133,7 @@ export default function BuyModal({
           <div>
             <h3 className="mti">Buy Your Word</h3>
             <p className="mde">
-              Choose a word, pick a package, and join the experiment.
+              Choose a word, pick a package, and become part of the experiment.
             </p>
 
             <div className="fld">
@@ -152,7 +146,7 @@ export default function BuyModal({
                 value={word}
                 onChange={(e) => {
                   setWord(e.target.value);
-                  setError(false);
+                  setError("");
                 }}
                 ref={wordRef}
                 style={error ? { borderColor: "#ff5f57" } : undefined}
@@ -190,8 +184,8 @@ export default function BuyModal({
             <div className="pkgs">
               {[
                 { count: 1, label: "1", sub: "word", price: "$1", extra: null },
-                { count: 5, label: "5", sub: "words", price: "$5", extra: "+ colors" },
-                { count: 25, label: "25", sub: "words", price: "$25", extra: "+ premium" },
+                { count: 5, label: "5", sub: "words", price: "$5", extra: "+ custom colors" },
+                { count: 25, label: "25", sub: "words", price: "$25", extra: "+ priority placement" },
               ].map((p) => (
                 <div
                   key={p.count}
@@ -211,22 +205,27 @@ export default function BuyModal({
               <span className="mtv">${pkg}.00</span>
             </div>
 
-            {/* TODO: Replace with Stripe Checkout integration */}
+            {error && (
+              <div style={{ color: "#ff5f57", fontSize: ".78rem", marginBottom: ".8rem", fontFamily: "var(--ff-m)" }}>
+                {error}
+              </div>
+            )}
+
             <button
               className="bco"
               onClick={handlePurchase}
               disabled={loading}
-              style={loading ? { opacity: 0.7 } : undefined}
+              style={loading ? { opacity: 0.7, cursor: "not-allowed" } : undefined}
             >
               {loading
                 ? "Processing..."
                 : `Complete Purchase — $${pkg}.00`}
             </button>
-            <div className="msec">🔒 Secured by Stripe · 256-bit SSL</div>
+            <div className="msec">Secured by Stripe &middot; 256-bit SSL</div>
           </div>
         ) : (
           <div className="succ">
-            <div className="se">🎉</div>
+            <div className="se" style={{ fontSize: "3.5rem", marginBottom: ".8rem" }}>&#10003;</div>
             <h3 className="stt">You&apos;re Part of History!</h3>
             <div className="sw">&quot;{successData.word}&quot;</div>
             <div className="sid">{successData.id}</div>
@@ -237,13 +236,13 @@ export default function BuyModal({
                 marginBottom: "1.2rem",
               }}
             >
-              Your word is live on the grid and part of the AI prompt.
+              Your word is live on the grid and part of the AI prompt. The next
+              AI generation will include your contribution.
             </p>
             <div className="shbs" style={{ marginTop: 0 }}>
               <button className="shb" onClick={shareOnX}>
-                𝕏 Share on X
+                &#120143; Share on X
               </button>
-              <button className="shb">📷 Download Card</button>
             </div>
             <button
               className="bco"

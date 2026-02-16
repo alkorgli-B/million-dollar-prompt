@@ -9,8 +9,8 @@ export default function Footer() {
             <span className="s">$</span>MillionDollarPrompt
           </div>
           <p className="fttg">
-            The world&apos;s largest collaborative AI experiment. One word at a
-            time.
+            The world&apos;s largest collaborative AI experiment. One million
+            words. One giant prompt. One AI mind.
           </p>
         </div>
         <div>
@@ -19,36 +19,33 @@ export default function Footer() {
             <li><a href="#grid">The Grid</a></li>
             <li><a href="#ai">Live AI</a></li>
             <li><a href="#pricing">Pricing</a></li>
-            <li><a href="#impact">Charity</a></li>
+            <li><a href="#impact">Impact</a></li>
           </ul>
         </div>
         <div>
-          <div className="ftct">Company</div>
+          <div className="ftct">Learn More</div>
           <ul className="ftll">
+            <li><a href="#how">How It Works</a></li>
+            <li><a href="#ms">Roadmap</a></li>
             <li><a href="#faq">FAQ</a></li>
-            <li><a href="#">Press Kit</a></li>
-            <li><a href="#">Contact</a></li>
-            <li><a href="#">Blog</a></li>
+            <li><a href="#payment">Payments</a></li>
           </ul>
         </div>
         <div>
           <div className="ftct">Legal</div>
           <ul className="ftll">
-            <li><a href="#">Terms</a></li>
-            <li><a href="#">Privacy</a></li>
-            <li><a href="#">Refunds</a></li>
-            <li><a href="#">GDPR</a></li>
+            <li><a href="#faq">Terms of Service</a></li>
+            <li><a href="#faq">Privacy Policy</a></li>
+            <li><a href="#faq">Refund Policy</a></li>
           </ul>
         </div>
       </div>
       <div className="ftbot">
         <span className="ftc">
-          &copy; 2026 MillionDollarPrompt. Built with ambition &amp; purpose.
+          &copy; 2025 MillionDollarPrompt. All rights reserved.
         </span>
         <div className="ftsoc">
-          <a href="#">X/Twitter</a>
-          <a href="#">GitHub</a>
-          <a href="#">Discord</a>
+          <a href="https://twitter.com/intent/tweet?text=Check%20out%20the%20Million%20Dollar%20Prompt%20—%20the%20world%27s%20largest%20collaborative%20AI%20experiment!&url=https%3A%2F%2Fmilliondollarprompt.com" target="_blank" rel="noopener noreferrer">X / Twitter</a>
         </div>
       </div>
     </footer>

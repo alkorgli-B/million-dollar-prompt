@@ -9,8 +9,13 @@ const tiers = [
     name: "Starter",
     words: "1 word",
     price: "$1",
-    sub: "one time",
-    features: ["Permanent grid spot", "Your clickable link", "Ownership card", "AI influence"],
+    sub: "one-time payment",
+    features: [
+      "Permanent grid placement",
+      "Your clickable link attached",
+      "Shareable ownership card",
+      "Influence the AI prompt",
+    ],
     featured: false,
     pkg: 1,
   },
@@ -18,8 +23,13 @@ const tiers = [
     name: "Builder",
     words: "5 words",
     price: "$5",
-    sub: "$1/word",
-    features: ["5 grid placements", "Priority positioning", "Custom word colors", "Leaderboard feature"],
+    sub: "$1 per word",
+    features: [
+      "5 permanent grid placements",
+      "Priority grid positioning",
+      "Custom word colors",
+      "Stronger AI influence",
+    ],
     featured: true,
     pkg: 5,
   },
@@ -27,8 +37,13 @@ const tiers = [
     name: "Visionary",
     words: "25 words",
     price: "$25",
-    sub: "$1/word",
-    features: ["25 grid placements", "Premium grid zone", "Sponsor badge", "Shape AI narrative"],
+    sub: "$1 per word",
+    features: [
+      "25 permanent grid placements",
+      "Premium grid zone access",
+      "Maximum AI prompt impact",
+      "Shape the narrative at scale",
+    ],
     featured: false,
     pkg: 25,
   },
@@ -41,7 +56,7 @@ export default function PricingCards({ onBuyClick }: PricingCardsProps) {
         <div className="sh">
           <span className="stag">Pricing</span>
           <h2 className="st">One Dollar. Or Go Big.</h2>
-          <p className="sd">Buy a single word or grab a bundle for maximum impact and better value.</p>
+          <p className="sd">Every word costs $1. Bundles give you more presence on the grid and stronger AI influence.</p>
         </div>
         <div className="pg3">
           {tiers.map((tier) => (
