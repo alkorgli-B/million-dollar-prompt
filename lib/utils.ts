@@ -20,10 +20,6 @@ export function timeAgo(date: string | Date): string {
   return `${days}d ago`;
 }
 
-export function getRandomItem<T>(arr: T[]): T {
-  return arr[Math.floor(Math.random() * arr.length)];
-}
-
 export function getRandomColor(): string {
   const colors = ["mint", "blue", "purple", "gold", "coral", "cyan"];
   return colors[Math.floor(Math.random() * colors.length)];

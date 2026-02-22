@@ -1,25 +1,19 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useLang } from "@/lib/context";
 import type { AIGeneration } from "@/lib/types";
-import { SAMPLE_WORDS, SAMPLE_AI_RESPONSES } from "@/lib/constants";
 
 export default function AITerminal() {
+  const { t } = useLang();
   const [generation, setGeneration] = useState<AIGeneration | null>(null);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [promptWords, setPromptWords] = useState<string[]>([]);
-  const [wordCount, setWordCount] = useState(0);
-  const [genNumber, setGenNumber] = useState(0);
-  const [lastUpdated, setLastUpdated] = useState("just now");
-  const [provider, setProvider] = useState("Multi-AI");
-  const [model, setModel] = useState("Llama 3.1 70B");
-  const [tokens, setTokens] = useState(0);
-  const responseIndex = useRef(0);
+  const [lastUpdated, setLastUpdated] = useState("");
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const typeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch latest AI generation
   useEffect(() => {
     async function fetchAI() {
       try {
@@ -28,57 +22,28 @@ export default function AITerminal() {
           const data = await res.json();
           if (data.generation) {
             setGeneration(data.generation);
-            setWordCount(data.generation.word_count);
-            setGenNumber(data.generation.generation_number);
-            setProvider(data.generation.provider);
-            setModel(data.generation.model);
-            setTokens(data.generation.tokens_used || 0);
             typeText(data.generation.response_text);
             if (data.generation.prompt_text) {
               setPromptWords(data.generation.prompt_text.split(" ").slice(0, 40));
             }
-            return;
           }
         }
       } catch {
-        // Fall through to demo mode
+        // No AI data available yet
       }
-
-      // Demo mode: use sample data with realistic numbers
-      setPromptWords(SAMPLE_WORDS.slice(0, 40));
-      setWordCount(SAMPLE_WORDS.length);
-      setGenNumber(1);
-      setProvider("Groq");
-      setModel("Llama 3.1 70B");
-      setTokens(847);
-      typeText(SAMPLE_AI_RESPONSES[0]);
     }
 
     fetchAI();
-
     const interval = setInterval(fetchAI, 60000);
     return () => clearInterval(interval);
   }, []);
 
-  // Cycle through AI responses in demo mode
   useEffect(() => {
-    if (generation) return;
+    if (!generation) return;
 
-    const interval = setInterval(() => {
-      responseIndex.current =
-        (responseIndex.current + 1) % SAMPLE_AI_RESPONSES.length;
-      setGenNumber((n) => n + 1);
-      setTokens(700 + Math.floor(Math.random() * 300));
-      typeText(SAMPLE_AI_RESPONSES[responseIndex.current]);
-    }, 20000);
-
-    return () => clearInterval(interval);
-  }, [generation]);
-
-  // Update "last updated" timer
-  useEffect(() => {
     let seconds = 0;
     if (timerRef.current) clearInterval(timerRef.current);
+    setLastUpdated("just now");
     timerRef.current = setInterval(() => {
       seconds++;
       if (seconds < 60) setLastUpdated(`${seconds}s ago`);
@@ -87,7 +52,7 @@ export default function AITerminal() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [genNumber]);
+  }, [generation]);
 
   function typeText(text: string) {
     if (typeTimeoutRef.current) clearTimeout(typeTimeoutRef.current);
@@ -108,44 +73,26 @@ export default function AITerminal() {
     type();
   }
 
-  // Colorize prompt words for display
   const colorizedWords = promptWords.map((word, i) => {
     const mod = i % 7;
     if (mod === 0 || mod === 5)
-      return (
-        <span key={i} className="hg">
-          {word}{" "}
-        </span>
-      );
+      return <span key={i} className="hg">{word}{" "}</span>;
     if (mod === 2)
-      return (
-        <span key={i} className="hb">
-          {word}{" "}
-        </span>
-      );
+      return <span key={i} className="hb">{word}{" "}</span>;
     if (mod === 4)
-      return (
-        <span key={i} className="hp">
-          {word}{" "}
-        </span>
-      );
+      return <span key={i} className="hp">{word}{" "}</span>;
     return <span key={i}>{word} </span>;
   });
+
+  const hasData = generation !== null;
 
   return (
     <section className="sec reveal vis" id="ai">
       <div className="wrap-s">
         <div className="sh">
-          <span className="stag">Live AI Output</span>
-          <h2 className="st">
-            The Prompt Grows.
-            <br />
-            The AI Responds.
-          </h2>
-          <p className="sd">
-            All purchased words combine into one massive prompt. The AI generates a
-            new response every 5 minutes.
-          </p>
+          <span className="stag">{t.ai.tag}</span>
+          <h2 className="st" style={{ whiteSpace: "pre-line" }}>{t.ai.title}</h2>
+          <p className="sd">{t.ai.desc}</p>
         </div>
         <div className="term">
           <div className="tbar">
@@ -154,41 +101,58 @@ export default function AITerminal() {
             <div className="td td-g"></div>
             <span className="ttl">milliondollarprompt — live</span>
             <div className="tst">
-              <div className="ldot"></div>{isTyping ? "GENERATING" : "READY"}
+              <div className="ldot"></div>
+              {hasData ? (isTyping ? t.ai.generating : t.ai.ready) : t.ai.waiting}
             </div>
           </div>
           <div className="tbody">
-            <div className="tlb tlb-g">
-              &#9656; Combined Prompt ({wordCount.toLocaleString()} words)
-            </div>
-            <div className="pbox">
-              {colorizedWords}
-              {promptWords.length > 0 && "..."}
-            </div>
-            <div className="tdiv"></div>
-            <div className="tlb tlb-p">
-              &#9733; AI Response{genNumber > 0 ? ` — Generation #${genNumber.toLocaleString()}` : ""}
-            </div>
-            <div className="aout">
-              {displayText}
-              {isTyping && <span className="cur"></span>}
-            </div>
-            <div className="tmeta">
-              <div className="tmi">
-                Provider: <b>&nbsp;{provider}</b>
-              </div>
-              <div className="tmi">
-                Model: <b>&nbsp;{model}</b>
-              </div>
-              {tokens > 0 && (
-                <div className="tmi">
-                  Tokens: <b>&nbsp;{tokens.toLocaleString()}</b>
+            {hasData ? (
+              <>
+                <div className="tlb tlb-g">
+                  &#9656; {t.ai.combined} ({generation.word_count.toLocaleString()} {t.ai.words})
                 </div>
-              )}
-              <div className="tmi">
-                Updated: <b>&nbsp;{lastUpdated}</b>
+                <div className="pbox">
+                  {colorizedWords}
+                  {promptWords.length > 0 && "..."}
+                </div>
+                <div className="tdiv"></div>
+                <div className="tlb tlb-p">
+                  &#9733; {t.ai.aiResponse} — {t.ai.generation} #{generation.generation_number.toLocaleString()}
+                </div>
+                <div className="aout">
+                  {displayText}
+                  {isTyping && <span className="cur"></span>}
+                </div>
+                <div className="tmeta">
+                  <div className="tmi">
+                    {t.ai.provider}: <b>&nbsp;{generation.provider}</b>
+                  </div>
+                  <div className="tmi">
+                    {t.ai.model}: <b>&nbsp;{generation.model}</b>
+                  </div>
+                  {generation.tokens_used && generation.tokens_used > 0 && (
+                    <div className="tmi">
+                      {t.ai.tokens}: <b>&nbsp;{generation.tokens_used.toLocaleString()}</b>
+                    </div>
+                  )}
+                  <div className="tmi">
+                    {t.ai.updated}: <b>&nbsp;{lastUpdated}</b>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
+                <div className="tlb tlb-g" style={{ justifyContent: "center", marginBottom: "1rem" }}>
+                  &#9656; {t.ai.combined} (0 {t.ai.words})
+                </div>
+                <p style={{ color: "var(--t3)", fontSize: ".9rem", lineHeight: 1.7, maxWidth: "400px", margin: "0 auto 1rem" }}>
+                  {t.ai.noWords}
+                </p>
+                <p style={{ color: "var(--t4)", fontSize: ".75rem", fontFamily: "var(--ff-m)", letterSpacing: "1px" }}>
+                  {t.ai.awaiting}
+                </p>
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

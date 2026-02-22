@@ -1,6 +1,7 @@
 "use client";
 
 import StatsBar from "./StatsBar";
+import { useLang } from "@/lib/context";
 import type { Stats } from "@/lib/types";
 
 interface HeroProps {
@@ -9,32 +10,34 @@ interface HeroProps {
 }
 
 export default function Hero({ onBuyClick, stats }: HeroProps) {
-  const scrollToAI = () => {
-    document.querySelector("#ai")?.scrollIntoView({ behavior: "smooth" });
+  const { t } = useLang();
+
+  const scrollDown = () => {
+    const target = stats.total_sold > 0 ? "#ai" : "#how";
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const hasActivity = stats.total_sold > 0;
 
   return (
     <section className="hero">
       <div className="hero-bg"></div>
       <div className="badge">
-        <div className="ldot"></div>Live experiment — words selling now
+        <div className="ldot"></div>
+        {hasActivity ? t.hero.badgeLive : t.hero.badgeNew}
       </div>
       <h1 className="h1">
-        <b>One Million Words.</b>
-        <b className="dim">One Giant Prompt.</b>
-        <b className="grd">One AI Mind.</b>
+        <b>{t.hero.h1a}</b>
+        <b className="dim">{t.hero.h1b}</b>
+        <b className="grd">{t.hero.h1c}</b>
       </h1>
-      <p className="hsub">
-        Buy a word for <em>$1</em>. It joins a million others to form the
-        largest collaborative AI prompt in human history. Watch the AI respond —
-        changing with every new word.
-      </p>
+      <p className="hsub">{t.hero.sub}</p>
       <div className="hbtns">
         <button className="bp bp-mint" onClick={onBuyClick}>
-          Buy Your Word — $1
+          {t.hero.btnBuy}
         </button>
-        <button className="bp bp-ghost" onClick={scrollToAI}>
-          Watch the AI Live &#8595;
+        <button className="bp bp-ghost" onClick={scrollDown}>
+          {hasActivity ? t.hero.btnWatchAI : t.hero.btnHowWorks} &#8595;
         </button>
       </div>
       <StatsBar stats={stats} />
