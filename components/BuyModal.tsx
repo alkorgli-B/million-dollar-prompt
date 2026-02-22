@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useLang } from "@/lib/context";
 
 interface BuyModalProps {
   isOpen: boolean;
@@ -15,6 +16,7 @@ export default function BuyModal({
   initialPackage = 1,
   onSuccess,
 }: BuyModalProps) {
+  const { t } = useLang();
   const [word, setWord] = useState("");
   const [link, setLink] = useState("");
   const [name, setName] = useState("");
@@ -43,7 +45,6 @@ export default function BuyModal({
     }
   }, [isOpen]);
 
-  // Close on Escape
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();
@@ -58,13 +59,13 @@ export default function BuyModal({
 
   const handlePurchase = async () => {
     if (!word.trim()) {
-      setError("Please enter a word or phrase.");
+      setError(t.modal.errorEmpty);
       wordRef.current?.focus();
       return;
     }
 
     if (word.trim().length > 30) {
-      setError("Word must be 30 characters or less.");
+      setError(t.modal.errorLong);
       wordRef.current?.focus();
       return;
     }
@@ -97,10 +98,10 @@ export default function BuyModal({
         onSuccess?.();
       } else {
         const data = await res.json().catch(() => null);
-        setError(data?.error || "Something went wrong. Please try again.");
+        setError(data?.error || t.modal.errorGeneral);
       }
     } catch {
-      setError("Connection failed. Please check your internet and try again.");
+      setError(t.modal.errorConnection);
     } finally {
       setLoading(false);
     }
@@ -131,17 +132,15 @@ export default function BuyModal({
 
         {!success ? (
           <div>
-            <h3 className="mti">Buy Your Word</h3>
-            <p className="mde">
-              Choose a word, pick a package, and become part of the experiment.
-            </p>
+            <h3 className="mti">{t.modal.title}</h3>
+            <p className="mde">{t.modal.desc}</p>
 
             <div className="fld">
-              <label className="flb">Your Word or Phrase</label>
+              <label className="flb">{t.modal.wordLabel}</label>
               <input
                 className="fli"
                 type="text"
-                placeholder='e.g. Dream, YourBrand, Hello World'
+                placeholder={t.modal.wordPlaceholder}
                 maxLength={30}
                 value={word}
                 onChange={(e) => {
@@ -151,41 +150,39 @@ export default function BuyModal({
                 ref={wordRef}
                 style={error ? { borderColor: "#ff5f57" } : undefined}
               />
-              <div className="flh">
-                Max 30 characters. Appears permanently on the grid.
-              </div>
+              <div className="flh">{t.modal.wordHint}</div>
             </div>
 
             <div className="fld">
-              <label className="flb">Your Link (optional)</label>
+              <label className="flb">{t.modal.linkLabel}</label>
               <input
                 className="fli"
                 type="url"
-                placeholder="https://yourwebsite.com"
+                placeholder={t.modal.linkPlaceholder}
                 value={link}
                 onChange={(e) => setLink(e.target.value)}
               />
             </div>
 
             <div className="fld">
-              <label className="flb">Your Name or Handle</label>
+              <label className="flb">{t.modal.nameLabel}</label>
               <input
                 className="fli"
                 type="text"
-                placeholder="@yourname"
+                placeholder={t.modal.namePlaceholder}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
             </div>
 
             <label className="flb" style={{ marginTop: ".8rem" }}>
-              Choose Package
+              {t.modal.packageLabel}
             </label>
             <div className="pkgs">
               {[
-                { count: 1, label: "1", sub: "word", price: "$1", extra: null },
-                { count: 5, label: "5", sub: "words", price: "$5", extra: "+ custom colors" },
-                { count: 25, label: "25", sub: "words", price: "$25", extra: "+ priority placement" },
+                { count: 1, label: "1", sub: t.pricing.word, price: "$1", extra: null },
+                { count: 5, label: "5", sub: t.pricing.words5, price: "$5", extra: t.modal.customColors },
+                { count: 25, label: "25", sub: t.pricing.words25, price: "$25", extra: t.modal.priorityPlacement },
               ].map((p) => (
                 <div
                   key={p.count}
@@ -201,7 +198,7 @@ export default function BuyModal({
             </div>
 
             <div className="mtot">
-              <span className="mtl">Total</span>
+              <span className="mtl">{t.modal.total}</span>
               <span className="mtv">${pkg}.00</span>
             </div>
 
@@ -218,15 +215,15 @@ export default function BuyModal({
               style={loading ? { opacity: 0.7, cursor: "not-allowed" } : undefined}
             >
               {loading
-                ? "Processing..."
-                : `Complete Purchase — $${pkg}.00`}
+                ? t.modal.processing
+                : `${t.modal.completePurchase} — $${pkg}.00`}
             </button>
-            <div className="msec">Secured by Stripe &middot; 256-bit SSL</div>
+            <div className="msec">{t.modal.secured} &middot; 256-bit SSL</div>
           </div>
         ) : (
           <div className="succ">
             <div className="se" style={{ fontSize: "3.5rem", marginBottom: ".8rem" }}>&#10003;</div>
-            <h3 className="stt">You&apos;re Part of History!</h3>
+            <h3 className="stt">{t.modal.successTitle}</h3>
             <div className="sw">&quot;{successData.word}&quot;</div>
             <div className="sid">{successData.id}</div>
             <p
@@ -236,12 +233,11 @@ export default function BuyModal({
                 marginBottom: "1.2rem",
               }}
             >
-              Your word is live on the grid and part of the AI prompt. The next
-              AI generation will include your contribution.
+              {t.modal.successDesc}
             </p>
             <div className="shbs" style={{ marginTop: 0 }}>
               <button className="shb" onClick={shareOnX}>
-                &#120143; Share on X
+                &#120143; {t.share.shareX}
               </button>
             </div>
             <button
@@ -249,7 +245,7 @@ export default function BuyModal({
               style={{ marginTop: "1.2rem" }}
               onClick={onClose}
             >
-              Back to Grid
+              {t.modal.backToGrid}
             </button>
           </div>
         )}

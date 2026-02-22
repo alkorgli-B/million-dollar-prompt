@@ -1,40 +1,24 @@
 "use client";
 
-const steps = [
-  {
-    num: "01",
-    icon: "&#9997;&#65039;",
-    title: "Choose Your Word",
-    desc: "Pick any word or phrase up to 30 characters. Your name, brand, a message, or anything meaningful to you.",
-  },
-  {
-    num: "02",
-    icon: "&#128179;",
-    title: "Pay Securely",
-    desc: "Instant checkout via Stripe. Visa, Mastercard, Apple Pay, Google Pay. Your payment is protected end-to-end.",
-  },
-  {
-    num: "03",
-    icon: "&#129302;",
-    title: "AI Generates",
-    desc: "Every 5 minutes, all purchased words combine into one prompt. The AI reads them and creates a new response.",
-  },
-  {
-    num: "04",
-    icon: "&#127758;",
-    title: "Own History",
-    desc: "Your word lives on the grid permanently. Share your ownership card. You're part of the largest AI collaboration ever.",
-  },
-];
+import { useLang } from "@/lib/context";
 
 export default function HowItWorks() {
+  const { t } = useLang();
+
+  const steps = [
+    { num: "01", icon: "&#9997;&#65039;", title: t.how.s1t, desc: t.how.s1d },
+    { num: "02", icon: "&#128179;", title: t.how.s2t, desc: t.how.s2d },
+    { num: "03", icon: "&#129302;", title: t.how.s3t, desc: t.how.s3d },
+    { num: "04", icon: "&#127758;", title: t.how.s4t, desc: t.how.s4d },
+  ];
+
   return (
     <section className="sec reveal vis" id="how">
       <div className="wrap">
         <div className="sh">
-          <span className="stag">How It Works</span>
-          <h2 className="st">Simple to Join.<br />Impossible to Forget.</h2>
-          <p className="sd">Four steps to becoming part of internet history.</p>
+          <span className="stag">{t.how.tag}</span>
+          <h2 className="st" style={{ whiteSpace: "pre-line" }}>{t.how.title}</h2>
+          <p className="sd">{t.how.desc}</p>
         </div>
         <div className="sg4">
           {steps.map((s) => (

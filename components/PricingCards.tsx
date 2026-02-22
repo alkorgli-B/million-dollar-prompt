@@ -1,66 +1,58 @@
 "use client";
 
+import { useLang } from "@/lib/context";
+
 interface PricingCardsProps {
   onBuyClick: (pkg?: number) => void;
 }
 
-const tiers = [
-  {
-    name: "Starter",
-    words: "1 word",
-    price: "$1",
-    sub: "one-time payment",
-    features: [
-      "Permanent grid placement",
-      "Your clickable link attached",
-      "Shareable ownership card",
-      "Influence the AI prompt",
-    ],
-    featured: false,
-    pkg: 1,
-  },
-  {
-    name: "Builder",
-    words: "5 words",
-    price: "$5",
-    sub: "$1 per word",
-    features: [
-      "5 permanent grid placements",
-      "Priority grid positioning",
-      "Custom word colors",
-      "Stronger AI influence",
-    ],
-    featured: true,
-    pkg: 5,
-  },
-  {
-    name: "Visionary",
-    words: "25 words",
-    price: "$25",
-    sub: "$1 per word",
-    features: [
-      "25 permanent grid placements",
-      "Premium grid zone access",
-      "Maximum AI prompt impact",
-      "Shape the narrative at scale",
-    ],
-    featured: false,
-    pkg: 25,
-  },
-];
-
 export default function PricingCards({ onBuyClick }: PricingCardsProps) {
+  const { t } = useLang();
+
+  const tiers = [
+    {
+      name: t.pricing.starter,
+      words: `1 ${t.pricing.word}`,
+      price: "$1",
+      sub: t.pricing.oneTime,
+      features: [t.pricing.f1, t.pricing.f2, t.pricing.f3, t.pricing.f4],
+      featured: false,
+      pkg: 1,
+      btnText: t.pricing.buyWord,
+    },
+    {
+      name: t.pricing.builder,
+      words: t.pricing.words5,
+      price: "$5",
+      sub: t.pricing.perWord,
+      features: [t.pricing.f5, t.pricing.f6, t.pricing.f7, t.pricing.f8],
+      featured: true,
+      pkg: 5,
+      btnText: t.pricing.buyWords5,
+    },
+    {
+      name: t.pricing.visionary,
+      words: t.pricing.words25,
+      price: "$25",
+      sub: t.pricing.perWord,
+      features: [t.pricing.f9, t.pricing.f10, t.pricing.f11, t.pricing.f12],
+      featured: false,
+      pkg: 25,
+      btnText: t.pricing.buyWords25,
+    },
+  ];
+
   return (
     <section className="sec reveal vis" id="pricing">
       <div className="wrap">
         <div className="sh">
-          <span className="stag">Pricing</span>
-          <h2 className="st">One Dollar. Or Go Big.</h2>
-          <p className="sd">Every word costs $1. Bundles give you more presence on the grid and stronger AI influence.</p>
+          <span className="stag">{t.pricing.tag}</span>
+          <h2 className="st">{t.pricing.title}</h2>
+          <p className="sd">{t.pricing.desc}</p>
         </div>
         <div className="pg3">
           {tiers.map((tier) => (
-            <div className={`pc${tier.featured ? " feat" : ""}`} key={tier.name}>
+            <div className={`pc${tier.featured ? " feat" : ""}`} key={tier.pkg}>
               <div className="pcn">{tier.name}</div>
               <div className="pcw">{tier.words}</div>
               <div className="pca">{tier.price}</div>
@@ -76,7 +68,7 @@ export default function PricingCards({ onBuyClick }: PricingCardsProps) {
                 className={`bpr ${tier.featured ? "bpr-f" : "bpr-g"}`}
                 onClick={() => onBuyClick(tier.pkg)}
               >
-                Buy {tier.words === "1 word" ? "1 Word" : `${tier.pkg} Words`}
+                {tier.btnText}
               </button>
             </div>
           ))}

@@ -1,5 +1,6 @@
 "use client";
 
+import { useLang } from "@/lib/context";
 import type { Stats } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
 
@@ -8,6 +9,7 @@ interface ImpactSectionProps {
 }
 
 export default function ImpactSection({ stats }: ImpactSectionProps) {
+  const { t } = useLang();
   const donated = Math.floor(stats.total_revenue * 0.3);
 
   return (
@@ -15,26 +17,22 @@ export default function ImpactSection({ stats }: ImpactSectionProps) {
       <div className="wrap">
         <div className="icard">
           <div className="iemj" style={{ fontSize: "3rem", marginBottom: ".8rem" }}>&#10084;&#65039;</div>
-          <h2 className="itt">Words That Heal</h2>
+          <h2 className="itt">{t.impact.title}</h2>
           <p className="itx">
-            <span className="hl">30% of all net profits</span> are donated
-            directly to children&apos;s hospitals and pediatric medical
-            charities. Every word you buy doesn&apos;t just make history — it
-            helps a child in need. We publish monthly transparency reports
-            tracking every donation.
+            <span className="hl">30% {t.impact.text}</span> {t.impact.textAfter}
           </p>
           <div className="ists">
             <div>
               <span className="isv">{formatCurrency(donated)}</span>
-              <span className="isl">Donated</span>
+              <span className="isl">{t.impact.donated}</span>
             </div>
             <div>
               <span className="isv">30%</span>
-              <span className="isl">Of Net Profits</span>
+              <span className="isl">{t.impact.ofNet}</span>
             </div>
             <div>
-              <span className="isv">Monthly</span>
-              <span className="isl">Reports</span>
+              <span className="isv">{t.impact.reports}</span>
+              <span className="isl">{t.impact.reportsLabel}</span>
             </div>
           </div>
         </div>

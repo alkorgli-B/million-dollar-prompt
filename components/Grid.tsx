@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import { useLang } from "@/lib/context";
 import type { Word } from "@/lib/types";
 import {
   GRID_COLS_DESKTOP,
@@ -21,6 +22,7 @@ interface CellData {
 }
 
 export default function Grid({ words, onCellClick }: GridProps) {
+  const { t } = useLang();
   const [filter, setFilter] = useState<"all" | "available" | "sold">("all");
   const [search, setSearch] = useState("");
   const [tooltip, setTooltip] = useState<{
@@ -54,7 +56,6 @@ export default function Grid({ words, onCellClick }: GridProps) {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Build cells from REAL words only — no fake data
   const cells = useMemo(() => {
     const totalCells = cols * rows;
     const newCells: CellData[] = [];
@@ -96,40 +97,35 @@ export default function Grid({ words, onCellClick }: GridProps) {
         x: e.clientX + 14,
         y: e.clientY - 12,
         content: cell.sold ? `"${cell.word}"` : "",
-        owner: cell.sold ? `by ${cell.owner}` : undefined,
+        owner: cell.sold ? `${t.grid.tooltipBy} ${cell.owner}` : undefined,
         sold: cell.sold,
       });
     },
-    []
+    [t]
   );
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent) => {
       if (tooltip.visible) {
-        setTooltip((t) => ({ ...t, x: e.clientX + 14, y: e.clientY - 12 }));
+        setTooltip((prev) => ({ ...prev, x: e.clientX + 14, y: e.clientY - 12 }));
       }
     },
     [tooltip.visible]
   );
 
   const handleMouseLeave = useCallback(() => {
-    setTooltip((t) => ({ ...t, visible: false }));
+    setTooltip((prev) => ({ ...prev, visible: false }));
   }, []);
 
   return (
     <section className="sec reveal vis" id="grid">
       <div className="sh wrap">
-        <span className="stag">The Grid</span>
-        <h2 className="st">
-          One Million Cells.
-          <br />
-          {soldCount > 0 ? "Filling Up." : "Waiting for You."}
+        <span className="stag">{t.grid.tag}</span>
+        <h2 className="st" style={{ whiteSpace: "pre-line" }}>
+          {soldCount > 0 ? t.grid.titleFilling : t.grid.titleWaiting}
         </h2>
         <p className="sd">
-          {soldCount > 0
-            ? "Click any empty cell to claim it. Hover sold cells to see who owns them."
-            : "Every cell is available. Click any cell to be among the first to claim your word."
-          }
+          {soldCount > 0 ? t.grid.descActive : t.grid.descEmpty}
         </p>
       </div>
       <div className="gw">
@@ -140,24 +136,24 @@ export default function Grid({ words, onCellClick }: GridProps) {
                 className={`tb${filter === "all" ? " on" : ""}`}
                 onClick={() => setFilter("all")}
               >
-                All
+                {t.grid.all}
               </button>
               <button
                 className={`tb${filter === "available" ? " on" : ""}`}
                 onClick={() => setFilter("available")}
               >
-                Available
+                {t.grid.avail}
               </button>
               <button
                 className={`tb${filter === "sold" ? " on" : ""}`}
                 onClick={() => setFilter("sold")}
               >
-                Sold
+                {t.grid.soldFilter}
               </button>
             </div>
             <input
               className="gsrch"
-              placeholder="Search a word..."
+              placeholder={t.grid.search}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
@@ -199,13 +195,13 @@ export default function Grid({ words, onCellClick }: GridProps) {
         </div>
         <div className="gib">
           <span className="gin">
-            Sold: <b>{soldCount.toLocaleString()}</b>
+            {t.grid.soldLabel}: <b>{soldCount.toLocaleString()}</b>
           </span>
           <span className="gin">
-            Available: <b>{(totalCells - soldCount).toLocaleString()}</b>
+            {t.grid.availLabel}: <b>{(totalCells - soldCount).toLocaleString()}</b>
           </span>
           <span className="gin">
-            Viewing: <b>{totalCells.toLocaleString()}</b> of 1,000,000
+            {t.grid.viewing}: <b>{totalCells.toLocaleString()}</b> {t.grid.of} 1,000,000
           </span>
         </div>
       </div>
@@ -221,7 +217,7 @@ export default function Grid({ words, onCellClick }: GridProps) {
           </>
         ) : (
           <span style={{ color: "var(--mint)" }}>
-            &#10010; Available — click to buy
+            &#10010; {t.grid.tooltipAvail}
           </span>
         )}
       </div>

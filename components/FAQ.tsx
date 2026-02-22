@@ -1,20 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { FAQ_DATA } from "@/lib/constants";
+import { useLang } from "@/lib/context";
 
 export default function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const { t } = useLang();
 
   return (
     <section className="sec reveal vis" id="faq">
       <div className="wrap">
         <div className="sh">
-          <span className="stag">FAQ</span>
-          <h2 className="st">Questions? Answers.</h2>
+          <span className="stag">{t.faq.tag}</span>
+          <h2 className="st">{t.faq.title}</h2>
         </div>
         <div className="fqg">
-          {FAQ_DATA.map((item, i) => (
+          {t.faq.items.map((item, i) => (
             <div
               className={`fqi${openIndex === i ? " op" : ""}`}
               key={i}

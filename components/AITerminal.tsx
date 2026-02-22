@@ -1,9 +1,11 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { useLang } from "@/lib/context";
 import type { AIGeneration } from "@/lib/types";
 
 export default function AITerminal() {
+  const { t } = useLang();
   const [generation, setGeneration] = useState<AIGeneration | null>(null);
   const [displayText, setDisplayText] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -36,7 +38,6 @@ export default function AITerminal() {
     return () => clearInterval(interval);
   }, []);
 
-  // Update "last updated" timer only when we have real data
   useEffect(() => {
     if (!generation) return;
 
@@ -89,16 +90,9 @@ export default function AITerminal() {
     <section className="sec reveal vis" id="ai">
       <div className="wrap-s">
         <div className="sh">
-          <span className="stag">Live AI Output</span>
-          <h2 className="st">
-            The Prompt Grows.
-            <br />
-            The AI Responds.
-          </h2>
-          <p className="sd">
-            All purchased words combine into one massive prompt. The AI generates a
-            new response every 5 minutes.
-          </p>
+          <span className="stag">{t.ai.tag}</span>
+          <h2 className="st" style={{ whiteSpace: "pre-line" }}>{t.ai.title}</h2>
+          <p className="sd">{t.ai.desc}</p>
         </div>
         <div className="term">
           <div className="tbar">
@@ -108,14 +102,14 @@ export default function AITerminal() {
             <span className="ttl">milliondollarprompt — live</span>
             <div className="tst">
               <div className="ldot"></div>
-              {hasData ? (isTyping ? "GENERATING" : "READY") : "WAITING"}
+              {hasData ? (isTyping ? t.ai.generating : t.ai.ready) : t.ai.waiting}
             </div>
           </div>
           <div className="tbody">
             {hasData ? (
               <>
                 <div className="tlb tlb-g">
-                  &#9656; Combined Prompt ({generation.word_count.toLocaleString()} words)
+                  &#9656; {t.ai.combined} ({generation.word_count.toLocaleString()} {t.ai.words})
                 </div>
                 <div className="pbox">
                   {colorizedWords}
@@ -123,7 +117,7 @@ export default function AITerminal() {
                 </div>
                 <div className="tdiv"></div>
                 <div className="tlb tlb-p">
-                  &#9733; AI Response — Generation #{generation.generation_number.toLocaleString()}
+                  &#9733; {t.ai.aiResponse} — {t.ai.generation} #{generation.generation_number.toLocaleString()}
                 </div>
                 <div className="aout">
                   {displayText}
@@ -131,32 +125,31 @@ export default function AITerminal() {
                 </div>
                 <div className="tmeta">
                   <div className="tmi">
-                    Provider: <b>&nbsp;{generation.provider}</b>
+                    {t.ai.provider}: <b>&nbsp;{generation.provider}</b>
                   </div>
                   <div className="tmi">
-                    Model: <b>&nbsp;{generation.model}</b>
+                    {t.ai.model}: <b>&nbsp;{generation.model}</b>
                   </div>
                   {generation.tokens_used && generation.tokens_used > 0 && (
                     <div className="tmi">
-                      Tokens: <b>&nbsp;{generation.tokens_used.toLocaleString()}</b>
+                      {t.ai.tokens}: <b>&nbsp;{generation.tokens_used.toLocaleString()}</b>
                     </div>
                   )}
                   <div className="tmi">
-                    Updated: <b>&nbsp;{lastUpdated}</b>
+                    {t.ai.updated}: <b>&nbsp;{lastUpdated}</b>
                   </div>
                 </div>
               </>
             ) : (
               <div style={{ textAlign: "center", padding: "2.5rem 1rem" }}>
                 <div className="tlb tlb-g" style={{ justifyContent: "center", marginBottom: "1rem" }}>
-                  &#9656; Combined Prompt (0 words)
+                  &#9656; {t.ai.combined} (0 {t.ai.words})
                 </div>
                 <p style={{ color: "var(--t3)", fontSize: ".9rem", lineHeight: 1.7, maxWidth: "400px", margin: "0 auto 1rem" }}>
-                  No words have been purchased yet. Once the first words are added to the grid,
-                  the AI will begin generating responses every 5 minutes.
+                  {t.ai.noWords}
                 </p>
                 <p style={{ color: "var(--t4)", fontSize: ".75rem", fontFamily: "var(--ff-m)", letterSpacing: "1px" }}>
-                  AWAITING FIRST WORDS...
+                  {t.ai.awaiting}
                 </p>
               </div>
             )}

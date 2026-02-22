@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useLang } from "@/lib/context";
 import type { TickerItem } from "@/lib/types";
 
 export default function Ticker() {
   const [items, setItems] = useState<TickerItem[]>([]);
+  const { t } = useLang();
 
   useEffect(() => {
     async function fetchRecent() {
@@ -26,7 +28,6 @@ export default function Ticker() {
     return () => clearInterval(interval);
   }, []);
 
-  // No purchases yet — show invitation message
   if (items.length === 0) {
     return (
       <div className="tick-w">
@@ -35,7 +36,7 @@ export default function Ticker() {
             <div className="ti" key={i}>
               <span className="d"></span>
               <span style={{ color: "var(--t3)" }}>
-                No purchases yet — <span className="bu">be the first to buy a word</span>
+                {t.ticker.noPurchases} <span className="bu">{t.ticker.beFirst}</span>
               </span>
             </div>
           ))}
@@ -52,7 +53,7 @@ export default function Ticker() {
         {tickerContent.map((item, i) => (
           <div className="ti" key={i}>
             <span className="d"></span>
-            <span className="bu">{item.owner}</span> bought{" "}
+            <span className="bu">{item.owner}</span> {t.ticker.bought}{" "}
             <span className="wo">&quot;{item.word}&quot;</span> —{" "}
             {item.time_ago}
           </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { AppProvider, useLang } from "@/lib/context";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Ticker from "@/components/Ticker";
@@ -19,11 +20,12 @@ import { useWords } from "@/hooks/useWords";
 import { useStats } from "@/hooks/useStats";
 import { formatNumber } from "@/lib/utils";
 
-export default function Home() {
+function HomeContent() {
   const [modalOpen, setModalOpen] = useState(false);
   const [modalPkg, setModalPkg] = useState(1);
   const { words, refetch: refetchWords } = useWords();
   const { stats, refetch: refetchStats } = useStats();
+  const { t } = useLang();
   const revealRef = useRef(false);
 
   const openModal = (pkg: number = 1) => {
@@ -78,20 +80,15 @@ export default function Home() {
       <FAQ />
 
       <section className="ctas reveal vis">
-        <h2 className="ctat">
-          Be Part of Something
-          <br />
-          Bigger Than Yourself.
+        <h2 className="ctat" style={{ whiteSpace: "pre-line" }}>
+          {t.cta.title}
         </h2>
-        <p className="ctax">
-          One word. One dollar. A million voices. An AI that listens to all of
-          them.
-        </p>
+        <p className="ctax">{t.cta.desc}</p>
         <button className="bp bp-mint" onClick={() => openModal()}>
-          Buy Your Word Now — $1
+          {t.cta.btn}
         </button>
         <div className="ctau">
-          {formatNumber(remaining)} of 1,000,000 words available
+          {formatNumber(remaining)} {t.cta.remaining}
         </div>
       </section>
 
@@ -104,5 +101,13 @@ export default function Home() {
         onSuccess={handlePurchaseSuccess}
       />
     </>
+  );
+}
+
+export default function Home() {
+  return (
+    <AppProvider>
+      <HomeContent />
+    </AppProvider>
   );
 }
