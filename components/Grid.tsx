@@ -3,9 +3,6 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import type { Word } from "@/lib/types";
 import {
-  SAMPLE_WORDS,
-  SAMPLE_OWNERS,
-  CELL_COLORS,
   GRID_COLS_DESKTOP,
   GRID_ROWS_DESKTOP,
 } from "@/lib/constants";
@@ -38,7 +35,6 @@ export default function Grid({ words, onCellClick }: GridProps) {
   const [rows, setRows] = useState(GRID_ROWS_DESKTOP);
   const gridRef = useRef<HTMLDivElement>(null);
 
-  // Determine grid dimensions based on viewport
   useEffect(() => {
     function updateDimensions() {
       const w = window.innerWidth;
@@ -58,12 +54,11 @@ export default function Grid({ words, onCellClick }: GridProps) {
     return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
-  // Build cells from real words + stable demo data
+  // Build cells from REAL words only — no fake data
   const cells = useMemo(() => {
     const totalCells = cols * rows;
     const newCells: CellData[] = [];
 
-    // Create a map of occupied positions from real words
     const occupied = new Map<string, Word>();
     words.forEach((w) => {
       const viewX = w.grid_x % cols;
@@ -85,28 +80,14 @@ export default function Grid({ words, onCellClick }: GridProps) {
           colorClass: getColorClass(w.color),
         });
       } else {
-        // Deterministic demo fill: use cell index to decide (~12% fill)
-        const hash = ((i * 7919 + 104729) % 100);
-        if (hash < 12) {
-          const wordIdx = i % SAMPLE_WORDS.length;
-          const ownerIdx = i % SAMPLE_OWNERS.length;
-          const colorIdx = i % CELL_COLORS.length;
-          newCells.push({
-            sold: true,
-            word: SAMPLE_WORDS[wordIdx],
-            owner: SAMPLE_OWNERS[ownerIdx],
-            colorClass: CELL_COLORS[colorIdx],
-          });
-        } else {
-          newCells.push({ sold: false });
-        }
+        newCells.push({ sold: false });
       }
     }
     return newCells;
   }, [words, cols, rows]);
 
   const soldCount = cells.filter((c) => c.sold).length;
-  const soldPercent = ((soldCount / (cols * rows)) * 100).toFixed(1);
+  const totalCells = cols * rows;
 
   const handleMouseEnter = useCallback(
     (e: React.MouseEvent, cell: CellData) => {
@@ -140,44 +121,48 @@ export default function Grid({ words, onCellClick }: GridProps) {
       <div className="sh wrap">
         <span className="stag">The Grid</span>
         <h2 className="st">
-          Every Cell Is a Word.
+          One Million Cells.
           <br />
-          Every Word Has an Owner.
+          {soldCount > 0 ? "Filling Up." : "Waiting for You."}
         </h2>
         <p className="sd">
-          Click any empty cell to claim it. Hover sold cells to see who owns
-          them.
+          {soldCount > 0
+            ? "Click any empty cell to claim it. Hover sold cells to see who owns them."
+            : "Every cell is available. Click any cell to be among the first to claim your word."
+          }
         </p>
       </div>
       <div className="gw">
-        <div className="gtb">
-          <div className="gtb-l">
-            <button
-              className={`tb${filter === "all" ? " on" : ""}`}
-              onClick={() => setFilter("all")}
-            >
-              All
-            </button>
-            <button
-              className={`tb${filter === "available" ? " on" : ""}`}
-              onClick={() => setFilter("available")}
-            >
-              Available
-            </button>
-            <button
-              className={`tb${filter === "sold" ? " on" : ""}`}
-              onClick={() => setFilter("sold")}
-            >
-              Sold
-            </button>
+        {soldCount > 0 && (
+          <div className="gtb">
+            <div className="gtb-l">
+              <button
+                className={`tb${filter === "all" ? " on" : ""}`}
+                onClick={() => setFilter("all")}
+              >
+                All
+              </button>
+              <button
+                className={`tb${filter === "available" ? " on" : ""}`}
+                onClick={() => setFilter("available")}
+              >
+                Available
+              </button>
+              <button
+                className={`tb${filter === "sold" ? " on" : ""}`}
+                onClick={() => setFilter("sold")}
+              >
+                Sold
+              </button>
+            </div>
+            <input
+              className="gsrch"
+              placeholder="Search a word..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
           </div>
-          <input
-            className="gsrch"
-            placeholder="Search a word..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+        )}
         <div className="gc">
           <div
             className="gi"
@@ -189,7 +174,6 @@ export default function Grid({ words, onCellClick }: GridProps) {
             onMouseMove={handleMouseMove}
           >
             {cells.map((cell, i) => {
-              // Filter logic
               if (filter === "available" && cell.sold) return null;
               if (filter === "sold" && !cell.sold) return null;
               if (
@@ -215,21 +199,17 @@ export default function Grid({ words, onCellClick }: GridProps) {
         </div>
         <div className="gib">
           <span className="gin">
-            <b>{soldPercent}%</b> sold
+            Sold: <b>{soldCount.toLocaleString()}</b>
           </span>
           <span className="gin">
-            Owners: <b>{soldCount.toLocaleString()}</b>
+            Available: <b>{(totalCells - soldCount).toLocaleString()}</b>
           </span>
           <span className="gin">
-            Cells: <b>{(cols * rows).toLocaleString()}</b> visible
-          </span>
-          <span className="gin">
-            Total: <b>1,000,000</b> cells
+            Viewing: <b>{totalCells.toLocaleString()}</b> of 1,000,000
           </span>
         </div>
       </div>
 
-      {/* Tooltip */}
       <div
         className={`gtt${tooltip.visible ? " on" : ""}`}
         style={{ left: tooltip.x, top: tooltip.y }}

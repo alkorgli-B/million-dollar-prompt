@@ -35,14 +35,11 @@ export default function Navbar({ onBuyClick }: NavbarProps) {
       <div className={`nm${menuOpen ? " open" : ""}`}>
         <a href="#grid" onClick={() => scrollTo("#grid")}>Grid</a>
         <a href="#how" onClick={() => scrollTo("#how")}>How</a>
-        <a href="#ai" onClick={() => scrollTo("#ai")}>Live AI</a>
+        <a href="#ai" onClick={() => scrollTo("#ai")}>AI</a>
         <a href="#pricing" onClick={() => scrollTo("#pricing")}>Pricing</a>
         <a href="#faq" onClick={() => scrollTo("#faq")}>FAQ</a>
       </div>
       <div className="nr">
-        <div className="live">
-          <div className="ldot"></div>LIVE
-        </div>
         <button className="nbtn" onClick={onBuyClick}>
           Buy a Word
         </button>

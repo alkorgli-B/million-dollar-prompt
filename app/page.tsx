@@ -36,7 +36,6 @@ export default function Home() {
     refetchStats();
   };
 
-  // Intersection Observer for reveal animations
   useEffect(() => {
     if (revealRef.current) return;
     revealRef.current = true;
@@ -61,7 +60,6 @@ export default function Home() {
 
   return (
     <>
-      {/* Ambient orbs */}
       <div className="orb o1"></div>
       <div className="orb o2"></div>
       <div className="orb o3"></div>
@@ -79,7 +77,6 @@ export default function Home() {
       <ImpactSection stats={stats} />
       <FAQ />
 
-      {/* CTA Section */}
       <section className="ctas reveal vis">
         <h2 className="ctat">
           Be Part of Something
@@ -94,7 +91,7 @@ export default function Home() {
           Buy Your Word Now — $1
         </button>
         <div className="ctau">
-          &#9888; Only {formatNumber(remaining)} words remaining
+          {formatNumber(remaining)} of 1,000,000 words available
         </div>
       </section>
 

@@ -2,14 +2,11 @@
 
 import { useState, useEffect } from "react";
 import type { TickerItem } from "@/lib/types";
-import { SAMPLE_WORDS, SAMPLE_OWNERS } from "@/lib/constants";
-import { getRandomItem } from "@/lib/utils";
 
 export default function Ticker() {
   const [items, setItems] = useState<TickerItem[]>([]);
 
   useEffect(() => {
-    // Fetch recent purchases from API
     async function fetchRecent() {
       try {
         const res = await fetch("/api/recent");
@@ -17,20 +14,11 @@ export default function Ticker() {
           const data = await res.json();
           if (data.items && data.items.length > 0) {
             setItems(data.items);
-            return;
           }
         }
       } catch {
-        // Fall through to demo data
+        // No data available
       }
-
-      // Generate demo ticker items if no real data
-      const demoItems: TickerItem[] = Array.from({ length: 25 }, () => ({
-        owner: getRandomItem(SAMPLE_OWNERS),
-        word: getRandomItem(SAMPLE_WORDS),
-        time_ago: `${Math.floor(Math.random() * 55)}m ago`,
-      }));
-      setItems(demoItems);
     }
 
     fetchRecent();
@@ -38,9 +26,24 @@ export default function Ticker() {
     return () => clearInterval(interval);
   }, []);
 
-  if (items.length === 0) return null;
+  // No purchases yet — show invitation message
+  if (items.length === 0) {
+    return (
+      <div className="tick-w">
+        <div className="tick">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <div className="ti" key={i}>
+              <span className="d"></span>
+              <span style={{ color: "var(--t3)" }}>
+                No purchases yet — <span className="bu">be the first to buy a word</span>
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
-  // Duplicate items for seamless infinite scroll
   const tickerContent = [...items, ...items];
 
   return (

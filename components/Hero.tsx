@@ -9,15 +9,19 @@ interface HeroProps {
 }
 
 export default function Hero({ onBuyClick, stats }: HeroProps) {
-  const scrollToAI = () => {
-    document.querySelector("#ai")?.scrollIntoView({ behavior: "smooth" });
+  const scrollDown = () => {
+    const target = stats.total_sold > 0 ? "#ai" : "#how";
+    document.querySelector(target)?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const hasActivity = stats.total_sold > 0;
 
   return (
     <section className="hero">
       <div className="hero-bg"></div>
       <div className="badge">
-        <div className="ldot"></div>Live experiment — words selling now
+        <div className="ldot"></div>
+        {hasActivity ? "Live experiment — words being added" : "New experiment — be the first to join"}
       </div>
       <h1 className="h1">
         <b>One Million Words.</b>
@@ -33,8 +37,8 @@ export default function Hero({ onBuyClick, stats }: HeroProps) {
         <button className="bp bp-mint" onClick={onBuyClick}>
           Buy Your Word — $1
         </button>
-        <button className="bp bp-ghost" onClick={scrollToAI}>
-          Watch the AI Live &#8595;
+        <button className="bp bp-ghost" onClick={scrollDown}>
+          {hasActivity ? "Watch the AI Live" : "See How It Works"} &#8595;
         </button>
       </div>
       <StatsBar stats={stats} />
